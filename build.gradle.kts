@@ -25,3 +25,7 @@ kotlin {
 application {
     mainClass.set("MainKt")
 }
+
+dependencies {
+    implementation("com.alibaba:fastjson:2.0.46")
+}

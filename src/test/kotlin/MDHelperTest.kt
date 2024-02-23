@@ -10,20 +10,79 @@ import kotlin.test.assertEquals
  */
 class MDHelperTest {
 
-    /**
-     * 单例实例化
-     */
     @Test
-    fun testGetInstance() {
-        val instance1 = MDHelper.getInstance()
-        val instance2 = MDHelper.getInstance()
+    fun dataTest() {
 
-        // 检查获取的实例是否非空
-        assertNotNull(instance1)
-        assertNotNull(instance2)
+        //todo 修改为自己的
+        val baseUrl = ""
+        val appKey = ""
+        val sign = ""
 
-        // 检查获取的实例是否是同一个实例
-        assert(instance1 === instance2)
+        val instance = MDHelper.getInstance()
+
+        instance.disableLog()
+
+        instance.addBaseUrl("my",baseUrl)
+
+        instance.addAppConfig("门禁产品",appKey,sign)
+
+        assertNotNull(instance.getAppInfo())
+    }
+
+    @Test
+    fun addOrRemoveAppConfig() {
+        val instance = MDHelper.getInstance()
+
+        assertThrows(Exception::class.java) {
+            instance.getAppConfig()
+        }
+
+        assertThrows(Exception::class.java) {
+            instance.getAppConfig(null)
+        }
+
+        assertThrows(Exception::class.java) {
+            instance.getAppConfig("")
+        }
+
+        assertThrows(Exception::class.java) {
+            instance.getAppConfig("not")
+        }
+
+        val key1 = "我的应用"
+        val appKey1 = "123456"
+        val sign1 = "666666"
+
+        val key2 = "我的应用2"
+        val appKey2 = "654321"
+        val sign2 = "111111"
+
+        instance.addAppConfig(key1, appKey1, sign1)
+
+        assertEquals(instance.getAppConfig().appKey, appKey1)
+
+        instance.addAppConfig(key2, appKey2, sign2)
+
+        assertEquals(instance.getAppConfig().appKey, appKey1)
+
+        assertEquals(instance.getAppConfig(key2).appKey, appKey2)
+
+        assertEquals(instance.getAllAppConfigs().size, 2)
+
+        instance.removeAppByConfigKey(key1)
+
+        assertEquals(instance.getAllAppConfigs().size, 1)
+
+        instance.removeAppByConfigKey(key2)
+        instance.removeAppByConfigKey("unkonwKey")
+
+        assertThrows(Exception::class.java) {
+            instance.getAppConfig()
+        }
+
+        instance.removeAllAppConfigs()
+
+        assertEquals(instance.getAllAppConfigs().size, 0)
     }
 
     /**
@@ -83,62 +142,26 @@ class MDHelperTest {
         assertEquals(instance.getAllBaseUrls().size, 0)
     }
 
-
+    /**
+     * 单例实例化
+     */
     @Test
-    fun addOrRemoveAppConfig() {
-        val instance = MDHelper.getInstance()
+    fun testGetInstance() {
+        val instance1 = MDHelper.getInstance()
+        val instance2 = MDHelper.getInstance()
 
-        assertThrows(Exception::class.java) {
-            instance.getAppConfig()
-        }
+        // 检查获取的实例是否非空
+        assertNotNull(instance1)
+        assertNotNull(instance2)
 
-        assertThrows(Exception::class.java) {
-            instance.getAppConfig(null)
-        }
-
-        assertThrows(Exception::class.java) {
-            instance.getAppConfig("")
-        }
-
-        assertThrows(Exception::class.java) {
-            instance.getAppConfig("not")
-        }
-
-        val key1 = "我的应用"
-        val appKey1 = "123456"
-        val sign1 = "666666"
-
-        val key2 = "我的应用2"
-        val appKey2 = "654321"
-        val sign2 = "111111"
-
-        instance.addAppConfig(key1, appKey1, sign1)
-
-        assertEquals(instance.getAppConfig().appKey, appKey1)
-
-        instance.addAppConfig(key2, appKey2, sign2)
-
-        assertEquals(instance.getAppConfig().appKey, appKey1)
-
-        assertEquals(instance.getAppConfig(key2).appKey, appKey2)
-
-        assertEquals(instance.getAllAppConfigs().size, 2)
-
-        instance.removeAppByConfigKey(key1)
-
-        assertEquals(instance.getAllAppConfigs().size, 1)
-
-        instance.removeAppByConfigKey(key2)
-        instance.removeAppByConfigKey("unkonwKey")
-
-        assertThrows(Exception::class.java) {
-            instance.getAppConfig()
-        }
-
-        instance.removeAllAppConfigs()
-
-        assertEquals(instance.getAllAppConfigs().size, 0)
+        // 检查获取的实例是否是同一个实例
+        assert(instance1 === instance2)
     }
+
+
+
+
+
 
 
 }

@@ -1,5 +1,6 @@
 package cn.uexpo.md_cloud
 
+import cn.uexpo.md_cloud.manager.ApiManager
 import cn.uexpo.md_cloud.manager.ConfigManager
 
 /**
@@ -26,7 +27,6 @@ class MDHelper private constructor() {
                 synchronized(MDHelper::class.java) {
                     if (instance == null) {
                         instance = MDHelper()
-                        MdLog.debug("MDHelper实例初始化成功,hash值:${instance.hashCode()}")
                     }
                 }
             }
@@ -34,7 +34,23 @@ class MDHelper private constructor() {
         }
     }
 
-    //todo 數據操作
+
+    /**
+     * 开启日志打印
+     */
+    fun enableLog() = MdLog.enable()
+
+
+    /**
+     * 关闭日志打印
+     */
+    fun disableLog() = MdLog.disable()
+
+    /**
+     * 获取应用数据
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     */
+    fun getAppInfo(baseUrlKey: String? = null, appConfigKey: String? = null) = ApiManager.getAppInfo(baseUrlKey, appConfigKey)
 
     /**
      * 添加应用配置

@@ -9,7 +9,7 @@ import java.util.*
 /**
  * SDK内部日志打印
  */
-object MdLog {
+internal object MdLog {
 
     // 是否打印日志
     private var isLogEnabled: Boolean = true
@@ -32,7 +32,7 @@ object MdLog {
     /**
      * 打印调试日志
      */
-    fun debug(msg: String) {
+    fun debug(msg: String?) {
         if (isLogEnabled) {
             println("[ERROR][${time()}] $msg")
         }
@@ -41,7 +41,7 @@ object MdLog {
     /**
      * 打印错误日志
      */
-    fun error(msg: String) {
+    fun error(msg: String?) {
         System.err.println("[ERROR][${time()}] ${msg}")
     }
 
