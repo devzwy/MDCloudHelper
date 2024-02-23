@@ -1,4 +1,5 @@
 import cn.uexpo.md_cloud.MdLog
+import cn.uexpo.md_cloud.manager.ConfigManager
 import java.lang.Exception
 import kotlin.test.Test
 
