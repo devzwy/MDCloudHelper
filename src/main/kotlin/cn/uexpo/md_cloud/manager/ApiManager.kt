@@ -51,7 +51,8 @@ internal object ApiManager {
         val url = "${ConfigManager.getBaseUrl(baseUrlKey)}${URL_ADD_ROWS}"
         val appConfig = ConfigManager.getAppConfig(appConfigKey)
 
-        val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign,
+        val requestData = hashMapOf(
+            "appKey" to appConfig.appKey, "sign" to appConfig.sign,
             "worksheetId" to tableId, "rows" to dataList.flatMap { arrayListOf(it.controls) }, "triggerWorkflow" to triggerWorkflow
         )
         val resultStr = HttpClientUtil.post(url, requestData.toJson())
@@ -95,6 +96,7 @@ internal object ApiManager {
      * 获取应用数据
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
      * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * @return 返回应用信息
      */
     fun getAppInfo(baseUrlKey: String? = null, appConfigKey: String? = null): JSONObject? {
         val appInfo = ConfigManager.getAppConfig(appConfigKey)

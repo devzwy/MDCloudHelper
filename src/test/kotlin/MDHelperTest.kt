@@ -18,9 +18,9 @@ class MDHelperTest {
     fun dataTest() {
 
         //todo 修改为自己的
-        val baseUrl = ""
-        val appKey = ""
-        val sign = ""
+//        val baseUrl = ""
+//        val appKey = ""
+//        val sign = ""
 
         val instance = MDHelper.getInstance()
 
