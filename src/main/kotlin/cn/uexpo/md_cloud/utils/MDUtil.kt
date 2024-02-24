@@ -5,7 +5,7 @@ import com.alibaba.fastjson2.JSON
 
 object MDUtil {
 
-    fun Map<*,*>.toJson() = JSON.toJSONString(this)
+    fun Any.toJson() = JSON.toJSONString(this)
 
 
 }

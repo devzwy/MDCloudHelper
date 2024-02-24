@@ -34,7 +34,7 @@ internal object MdLog {
      */
     fun debug(msg: String?) {
         if (isLogEnabled) {
-            println("[ERROR][${time()}] $msg")
+            println("[DEBUG][${time()}] $msg")
         }
     }
 

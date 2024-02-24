@@ -2,6 +2,7 @@ package cn.uexpo.md_cloud
 
 import cn.uexpo.md_cloud.manager.ApiManager
 import cn.uexpo.md_cloud.manager.ConfigManager
+import cn.uexpo.md_cloud.utils.MdControl
 
 /**
  * 明道工具类
@@ -34,6 +35,27 @@ class MDHelper private constructor() {
         }
     }
 
+    /**
+     * 插入多行记录，最大1000行
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [dataList] 写入的数据列，使用[MdControl.Builder]构造多个
+     * [triggerWorkflow] 是否触发工作流(默认: true)
+     * @return 写入成功后回传写入的行ID
+     */
+    fun insertRows(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, dataList: List<MdControl>, triggerWorkflow: Boolean = true) = ApiManager.insertRows(baseUrlKey, appConfigKey, tableId, dataList, triggerWorkflow)
+
+
+        /**
+     * 插入单行记录
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [data] 写入的数据列，使用[MdControl.Builder]构造
+     * [triggerWorkflow] 是否触发工作流(默认: true)
+     */
+    fun insertRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, data: MdControl, triggerWorkflow: Boolean = true) = ApiManager.insertRow(baseUrlKey, appConfigKey, tableId, data, triggerWorkflow)
 
     /**
      * 开启日志打印

@@ -1,4 +1,5 @@
 import cn.uexpo.md_cloud.MdLog
+import com.alibaba.fastjson2.JSON
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -6,27 +7,30 @@ import java.io.UnsupportedEncodingException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import java.util.Date
 
 class HttpClientUtil {
 
     companion object {
-        fun post(url: String, jsonStr: String): String? {
+        fun post(url: String, jsonStr: String): String {
             return httpRequest(url, "POST", jsonStr)
         }
 
-        fun get(url: String, params: Map<String, String>): String? {
-            val fullUrl = buildUrlWithParams(url, params) ?: return null
-            return httpRequest(fullUrl.toString(), "GET", null)
+        fun get(url: String, params: Map<String, String>): String {
+            return httpRequest(buildUrlWithParams(url, params).toString(), "GET", null)
         }
 
-        private fun httpRequest(url: String, method: String, requestBody: String?): String? {
+        private fun httpRequest(url: String, method: String, requestBody: String?): String {
+
+            //开始请求时间
+            val startRequestTime = Date().time
 
             val connection = URL(url).openConnection() as HttpURLConnection
 
             if (method == "GET") {
-                MdLog.debug("GET请求:${url}")
+                MdLog.debug("GET -> ${url}")
             } else {
-                MdLog.debug("POST请求:${url},数据:${requestBody}")
+                MdLog.debug("POST -> ${url}\n数据:${requestBody}")
             }
 
             connection.requestMethod = method
@@ -37,15 +41,10 @@ class HttpClientUtil {
             connection.readTimeout = 60 * 1000// 读取超时时间为10秒
             connection.doOutput = true
 
-            try {
-                if (requestBody != null) {
-                    val os: OutputStream = connection.outputStream
-                    val input: ByteArray = requestBody.toByteArray(charset("utf-8"))
-                    os.write(input, 0, input.size)
-                }
-            } catch (e: Exception) {
-                MdLog.error(e)
-                return null
+            if (requestBody != null) {
+                val os: OutputStream = connection.outputStream
+                val input: ByteArray = requestBody.toByteArray(charset("utf-8"))
+                os.write(input, 0, input.size)
             }
 
             val responseCode = connection.responseCode
@@ -59,30 +58,25 @@ class HttpClientUtil {
                     response.append(line)
                 }
                 reader.close()
-            } else {
-                return null
+            }else{
+                MdLog.error(response.toString())
             }
 
             connection.disconnect()
 
-            return response.toString()
+            return response.toString().also { MdLog.debug("${method}回传 ${url}\n请求耗时:${Date().time - startRequestTime} ms\n回传数据:${it}") }
         }
 
-        private fun buildUrlWithParams(url: String, params: Map<String, String>): URL? {
+        private fun buildUrlWithParams(url: String, params: Map<String, String>): URL {
             val urlBuilder = StringBuilder(url)
             if (params.isNotEmpty()) {
                 urlBuilder.append('?')
                 for ((key, value) in params) {
-                    try {
-                        urlBuilder
-                            .append(URLEncoder.encode(key, "UTF-8"))
-                            .append('=')
-                            .append(URLEncoder.encode(value, "UTF-8"))
-                            .append('&')
-                    } catch (e: UnsupportedEncodingException) {
-                        MdLog.error(e)
-                        return null
-                    }
+                    urlBuilder
+                        .append(URLEncoder.encode(key, "UTF-8"))
+                        .append('=')
+                        .append(URLEncoder.encode(value, "UTF-8"))
+                        .append('&')
                 }
                 urlBuilder.deleteCharAt(urlBuilder.length - 1) // Remove the last '&'
             }

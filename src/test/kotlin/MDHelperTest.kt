@@ -1,6 +1,10 @@
 import cn.uexpo.md_cloud.MDHelper
+import cn.uexpo.md_cloud.data.MuliDataType
+import cn.uexpo.md_cloud.data.OptionDataType
+import cn.uexpo.md_cloud.utils.MdControl
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -20,13 +24,46 @@ class MDHelperTest {
 
         val instance = MDHelper.getInstance()
 
-        instance.disableLog()
+//        instance.disableLog()
 
-        instance.addBaseUrl("my",baseUrl)
+        instance.addBaseUrl("my", baseUrl)
 
-        instance.addAppConfig("门禁产品",appKey,sign)
+        instance.addAppConfig("我的应用", appKey, sign)
 
         assertNotNull(instance.getAppInfo())
+
+        //写入记录
+        val rowId = instance.insertRow(
+            tableId = "658e7f60dd2e9988fc03dc25",
+            data = MdControl.Builder()
+                .addControl("658e7f60dd2e9988fc03dc26", "1111111")
+                .addControl("658e7f75dd2e9988fc03dc31", "你好")
+                .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("111.list"), MuliDataType.BASE64)
+                .addOption("65b0b8ef384db183c9a18342", "已打印2", OptionDataType.ADD)
+                .build()
+        )
+        assertNotNull(rowId)
+
+        val rowCount = instance.insertRows(
+            tableId = "658e7f60dd2e9988fc03dc25",
+            dataList = arrayListOf(
+                MdControl.Builder()
+                    .addControl("658e7f60dd2e9988fc03dc26", "1111111")
+                    .addControl("658e7f75dd2e9988fc03dc31", "你好")
+                    .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("222.list"), MuliDataType.BASE64)
+                    .addOption("65b0b8ef384db183c9a18342", "已打印2", OptionDataType.ADD)
+                    .build(),
+                MdControl.Builder()
+                    .addControl("658e7f60dd2e9988fc03dc26", "222")
+                    .addControl("658e7f75dd2e9988fc03dc31", "你好啊啊啊啊啊")
+                    .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("333.list"), MuliDataType.BASE64)
+                    .addOption("65b0b8ef384db183c9a18342", "已打印")
+                    .build()
+            )
+        )
+
+        assertEquals(rowCount, 2)
+
     }
 
     @Test
@@ -157,11 +194,6 @@ class MDHelperTest {
         // 检查获取的实例是否是同一个实例
         assert(instance1 === instance2)
     }
-
-
-
-
-
 
 
 }
