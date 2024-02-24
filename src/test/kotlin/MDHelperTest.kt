@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * 单元测试 针对全部Api测试
@@ -22,6 +23,7 @@ class MDHelperTest {
         val appKey = ""
         val sign = ""
 
+
         val instance = MDHelper.getInstance()
 
 //        instance.disableLog()
@@ -31,6 +33,10 @@ class MDHelperTest {
         instance.addAppConfig("我的应用", appKey, sign)
 
         assertNotNull(instance.getAppInfo())
+
+        val tableInfo = instance.getTableInfo(tableId = "658e7f60dd2e9988fc03dc25")
+
+        assertNotNull(tableInfo)
 
         //写入记录
         val rowId = instance.insertRow(
@@ -43,6 +49,15 @@ class MDHelperTest {
                 .build()
         )
         assertNotNull(rowId)
+
+        assertTrue { instance.updateRow(tableId = "658e7f60dd2e9988fc03dc25", rowId = rowId, data = MdControl.Builder()
+            .addControl("658e7f60dd2e9988fc03dc26", "更新后的数据")
+            .addControl("658e7f75dd2e9988fc03dc31", "更新后的数据2")
+            .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("更新后的数据.list"), MuliDataType.BASE64)
+            .addOption("65b0b8ef384db183c9a18342", "更新后的数据", OptionDataType.ADD)
+            .build()) }
+
+        assertNotNull(instance.getRow(tableId = "658e7f60dd2e9988fc03dc25", rowId = rowId))
 
         val rowCount = instance.insertRows(
             tableId = "658e7f60dd2e9988fc03dc25",

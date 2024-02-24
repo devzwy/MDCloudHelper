@@ -35,6 +35,29 @@ class MDHelper private constructor() {
         }
     }
 
+
+    /**
+     * 编辑行记录
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [rowId] 行记录ID
+     * [data] 更新的数据列，使用[MdControl.Builder]构造
+     * [triggerWorkflow] 是否触发工作流(默认: true)
+     * @return 编辑成功返回true，否则返回false
+     */
+    fun updateRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String, data: MdControl, triggerWorkflow: Boolean = true) = ApiManager.updateRow(baseUrlKey, appConfigKey, tableId, rowId, data, triggerWorkflow)
+
+    /**
+     * 获取行记录详情
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [rowId] 行记录ID
+     * @return 行记录数据JSON
+     */
+    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String) = ApiManager.getRow(baseUrlKey, appConfigKey, tableId, rowId)
+
     /**
      * 插入多行记录，最大1000行
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
@@ -61,15 +84,13 @@ class MDHelper private constructor() {
         ApiManager.insertRow(baseUrlKey, appConfigKey, tableId, data, triggerWorkflow)
 
     /**
-     * 开启日志打印
+     * 获取表结构信息
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * @return 表结构信息JSOn
      */
-    fun enableLog() = MdLog.enable()
-
-
-    /**
-     * 关闭日志打印
-     */
-    fun disableLog() = MdLog.disable()
+    fun getTableInfo(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String) = ApiManager.getTableInfo(baseUrlKey, appConfigKey, tableId)
 
     /**
      * 获取应用数据
@@ -77,6 +98,17 @@ class MDHelper private constructor() {
      * @return 返回应用信息
      */
     fun getAppInfo(baseUrlKey: String? = null, appConfigKey: String? = null) = ApiManager.getAppInfo(baseUrlKey, appConfigKey)
+
+    /**
+     * 开启日志打印
+     */
+    fun enableLog() = MdLog.enable()
+
+    /**
+     * 关闭日志打印
+     */
+    fun disableLog() = MdLog.disable()
+
 
     /**
      * 添加应用配置

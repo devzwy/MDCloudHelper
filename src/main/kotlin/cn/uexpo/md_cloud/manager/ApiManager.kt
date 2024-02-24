@@ -23,8 +23,18 @@ internal object ApiManager {
     //批量增加行记录
     private const val URL_ADD_ROWS = "/api/v2/open/worksheet/addRows"
 
-    //新建表 BASEURL/api/v2/open/worksheet/addWorksheet
-    //获取表结构：BASEURL/api/v2/open/worksheet/getWorksheetInfo
+    //表结构信息
+    private const val URL_TABLE_INFO = "/api/v2/open/worksheet/getWorksheetInfo"
+
+    //编辑行记录
+    private const val URL_EDIT_ROW = "/api/v2/open/worksheet/editRow"
+
+    //获取行记录详情
+    private const val URL_GET_ROW = "/api/v2/open/worksheet/getRowByIdPost"
+
+
+
+    //获取表结构：BASEURL
 
     //获取记录总行数：BASEURL/api/v2/open/worksheet/getFilterRowsTotalNum
     //获取列表：BASEURL/api/v2/open/worksheet/getFilterRows
@@ -48,8 +58,9 @@ internal object ApiManager {
      * @return 写入成功后回传写入成功的总行数
      */
     fun insertRows(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, dataList: List<MdControl>, triggerWorkflow: Boolean = true): Int {
-        val url = "${ConfigManager.getBaseUrl(baseUrlKey)}${URL_ADD_ROWS}"
-        val appConfig = ConfigManager.getAppConfig(appConfigKey)
+
+        val url = getUrl(baseUrlKey, URL_ADD_ROWS)
+        val appConfig = getAppConfig(appConfigKey)
 
         val requestData = hashMapOf(
             "appKey" to appConfig.appKey, "sign" to appConfig.sign,
@@ -77,8 +88,9 @@ internal object ApiManager {
      * @return 写入成功后回传写入的行ID
      */
     fun insertRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, data: MdControl, triggerWorkflow: Boolean = true): String {
-        val url = "${ConfigManager.getBaseUrl(baseUrlKey)}${URL_ADD_ROW}"
-        val appConfig = ConfigManager.getAppConfig(appConfigKey)
+
+        val url = getUrl(baseUrlKey, URL_ADD_ROW)
+        val appConfig = getAppConfig(appConfigKey)
 
         val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign, "worksheetId" to tableId, "controls" to data.controls, "triggerWorkflow" to triggerWorkflow)
         val resultStr = HttpClientUtil.post(url, requestData.toJson())
@@ -89,6 +101,82 @@ internal object ApiManager {
             result.data!!
         } else {
             throw RuntimeException("获取应用数据请求失败，明道回传了失败的结果")
+        }
+    }
+
+    /**
+     * 编辑行记录
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [rowId] 行记录ID
+     * [data] 更新的数据列，使用[MdControl.Builder]构造
+     * [triggerWorkflow] 是否触发工作流(默认: true)
+     * @return 编辑成功返回true，否则返回false
+     */
+    fun updateRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String, data: MdControl, triggerWorkflow: Boolean = true): Boolean {
+
+        val url = getUrl(baseUrlKey, URL_EDIT_ROW)
+        val appConfig = getAppConfig(appConfigKey)
+
+        val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign, "worksheetId" to tableId, "rowId" to rowId,
+            "controls" to data.controls, "triggerWorkflow" to triggerWorkflow)
+        val resultStr = HttpClientUtil.post(url, requestData.toJson())
+        //解析数据
+        val result = JSON.parseObject(resultStr, object : TypeReference<BaseResult<Boolean>>() {})
+
+        return if (ErrorCodeEnum.fromCode(result.error_code) == ErrorCodeEnum.SUCCESS) {
+            result.data!!
+        } else {
+            throw RuntimeException("编辑行记录请求失败，明道回传了失败的结果")
+        }
+    }
+
+
+    /**
+     * 获取行记录详情
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [rowId] 行记录ID
+     * @return 行记录数据JSON
+     */
+    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String): JSONObject {
+
+        val url = getUrl(baseUrlKey, URL_GET_ROW)
+        val appConfig = getAppConfig(appConfigKey)
+
+        val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign, "worksheetId" to tableId, "rowId" to rowId)
+        val resultStr = HttpClientUtil.post(url, requestData.toJson())
+        //解析数据
+        val result = JSON.parseObject(resultStr, object : TypeReference<BaseResult<JSONObject>>() {})
+
+        return if (ErrorCodeEnum.fromCode(result.error_code) == ErrorCodeEnum.SUCCESS) {
+            result.data!!
+        } else {
+            throw RuntimeException("获取行记录详情请求失败，明道回传了失败的结果")
+        }
+    }
+
+    /**
+     * 获取表结构信息
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * @return 表结构信息JSOn
+     */
+    fun getTableInfo(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String):JSONObject {
+        val url = getUrl(baseUrlKey, URL_TABLE_INFO)
+        val appConfig = getAppConfig(appConfigKey)
+        val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign, "worksheetId" to tableId)
+        val resultStr = HttpClientUtil.post(url, requestData.toJson())
+        //解析数据
+        val result = JSON.parseObject(resultStr, object : TypeReference<BaseResult<JSONObject>>() {})
+
+        return if (ErrorCodeEnum.fromCode(result.error_code) == ErrorCodeEnum.SUCCESS) {
+            result.data!!
+        } else {
+            throw RuntimeException("获取表结构信息请求失败，明道回传了失败的结果")
         }
     }
 
@@ -113,6 +201,10 @@ internal object ApiManager {
             throw RuntimeException("获取应用数据请求失败，明道回传了失败的结果")
         }
     }
+
+    private fun getUrl(baseUrlKey: String?, path: String?) = "${ConfigManager.getBaseUrl(baseUrlKey)}${path}"
+
+    private fun getAppConfig(appConfigKey: String?) = ConfigManager.getAppConfig(appConfigKey)
 
 
     /**
