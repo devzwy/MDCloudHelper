@@ -1,9 +1,11 @@
 package cn.uexpo.md_cloud
 
+import cn.uexpo.md_cloud.data.RowBaseResult
 import cn.uexpo.md_cloud.manager.ApiManager
 import cn.uexpo.md_cloud.manager.ConfigManager
 import cn.uexpo.md_cloud.utils.MdDataControl
 import cn.uexpo.md_cloud.utils.MdFilterControl
+import com.alibaba.fastjson2.TypeReference
 
 /**
  * 明道工具类
@@ -50,9 +52,10 @@ class MDHelper private constructor() {
      * [isAsc] 是否升序
      * [notGetTotal] 是否不统计总行数以提高性能(默认: false)
      * [useControlId] 是否只返回controlId(默认: false)
-     * @return 过滤后的数据列表
+     * [clazz] 最终列表的每个实体的接收对象
+     * @return 过滤后的数据[RowBaseResult]
      */
-    fun getRows(
+    fun <T> getRows(
         baseUrlKey: String? = null,
         appConfigKey: String? = null,
         tableId: String,
@@ -64,7 +67,8 @@ class MDHelper private constructor() {
         isAsc: Boolean? = null,
         notGetTotal: Boolean? = null,
         useControlId: Boolean? = null,
-    ) = ApiManager.getRows(baseUrlKey, appConfigKey, tableId, filter, pageSize, pageIndex, viewId, sortId, isAsc, notGetTotal, useControlId)
+        clazz: Class<T>,
+    ) = ApiManager.getRows(baseUrlKey, appConfigKey, tableId, filter, pageSize, pageIndex, viewId, sortId, isAsc, notGetTotal, useControlId,clazz)
 
     /**
      * 删除行记录
@@ -99,7 +103,7 @@ class MDHelper private constructor() {
      * [rowId] 行记录ID
      * @return 行记录数据JSON
      */
-    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String) = ApiManager.getRow(baseUrlKey, appConfigKey, tableId, rowId)
+    fun <T> getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String,clazz:Class<T>) = ApiManager.getRow(baseUrlKey, appConfigKey, tableId, rowId,clazz)
 
     /**
      * 插入多行记录，最大1000行

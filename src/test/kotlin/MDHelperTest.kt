@@ -1,9 +1,8 @@
 import cn.uexpo.md_cloud.MDHelper
-import cn.uexpo.md_cloud.data.DataTypeEnum
-import cn.uexpo.md_cloud.data.MuliDataType
-import cn.uexpo.md_cloud.data.OptionDataType
+import cn.uexpo.md_cloud.data.*
 import cn.uexpo.md_cloud.utils.MdDataControl
 import cn.uexpo.md_cloud.utils.MdFilterControl
+import com.alibaba.fastjson2.TypeReference
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
 import kotlin.test.Test
@@ -52,18 +51,23 @@ class MDHelperTest {
         )
         assertNotNull(rowId)
 
-        assertTrue { instance.updateRow(tableId = tableId, rowId = rowId, data = MdDataControl.Builder()
-            .addControl("658e7f60dd2e9988fc03dc26", "更新后的数据")
-            .addControl("658e7f75dd2e9988fc03dc31", "更新后的数据2")
-            .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("更新后的数据.list"), MuliDataType.BASE64)
-            .addOption("65b0b8ef384db183c9a18342", "更新后的数据", OptionDataType.ADD)
-            .build()) }
+        assertTrue {
+            instance.updateRow(
+                tableId = tableId, rowId = rowId, data = MdDataControl.Builder()
+                    .addControl("658e7f60dd2e9988fc03dc26", "更新后的数据")
+                    .addControl("658e7f75dd2e9988fc03dc31", "更新后的数据2")
+                    .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("更新后的数据.list"), MuliDataType.BASE64)
+                    .addOption("65b0b8ef384db183c9a18342", "更新后的数据", OptionDataType.ADD)
+                    .build()
+            )
+        }
 
-        assertNotNull(instance.getRow(tableId = tableId, rowId = rowId))
-        
-        
+        val a = instance.getRow(tableId = tableId, rowId = rowId, clazz = AAAA::class.java)
+        assertNotNull(a)
+
+
         instance.deleteRow(tableId = tableId, rowId = rowId)
-        
+
         val rowCount = instance.insertRows(
             tableId = tableId,
             dataList = arrayListOf(
@@ -88,11 +92,15 @@ class MDHelperTest {
         val resultData = instance.getRows(
             tableId = tableId,
             filter = MdFilterControl.Builder()
-                .addFilter("658e7f60dd2e9988fc03dc26","222",FilterTypeEnum.EQ)
-                .addFilter("65b0b8ef384db183c9a18342","更新后的数据",FilterTypeEnum.NE)
+                .addFilter("658e7f60dd2e9988fc03dc26", "222", FilterTypeEnum.EQ)
+                .addFilter("65b0b8ef384db183c9a18342", "更新后的数据", FilterTypeEnum.NE)
                 .build(),
+            clazz = AAAA::class.java
         )
 
+
+
+        println(resultData.rows[0].`658e7f60dd2e9988fc03dc26`)
     }
 
     @Test
@@ -225,4 +233,7 @@ class MDHelperTest {
     }
 
 
+    class AAAA : Row() {
+        var `658e7f60dd2e9988fc03dc26`: String = ""
+    }
 }

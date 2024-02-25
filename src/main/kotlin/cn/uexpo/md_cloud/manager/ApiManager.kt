@@ -2,12 +2,17 @@ package cn.uexpo.md_cloud.manager
 
 import HttpClientUtil
 import cn.uexpo.md_cloud.data.BaseResult
+import cn.uexpo.md_cloud.data.RowBaseResult
 import cn.uexpo.md_cloud.utils.MDUtil.toJson
 import cn.uexpo.md_cloud.utils.MdDataControl
 import cn.uexpo.md_cloud.utils.MdFilterControl
+import com.alibaba.fastjson.parser.Feature
 import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONObject
 import com.alibaba.fastjson2.TypeReference
+import com.alibaba.fastjson2.util.ParameterizedTypeImpl
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
 /**
  * 数据管理器
@@ -38,14 +43,6 @@ internal object ApiManager {
     //过滤行
     private const val URL_FILTER_ROW = "/api/v2/open/worksheet/getFilterRows"
 
-
-    //获取表结构：BASEURL
-
-    //获取列表：BASEURL/api/v2/open/worksheet/getFilterRows
-    //获取关联记录：BASEURL/api/v2/open/worksheet/getRowRelations
-    //
-
-
     /**
      * 获取列表
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
@@ -59,9 +56,10 @@ internal object ApiManager {
      * [isAsc] 是否升序
      * [notGetTotal] 是否不统计总行数以提高性能(默认: false)
      * [useControlId] 是否只返回controlId(默认: false)
-     * @return 过滤后的数据列表
+     * [clazz] 最终列表的每个实体的接收对象
+     * @return 过滤后的数据[RowBaseResult]
      */
-    fun getRows(
+   fun <T> getRows(
         baseUrlKey: String? = null,
         appConfigKey: String? = null,
         tableId: String,
@@ -73,7 +71,8 @@ internal object ApiManager {
         isAsc: Boolean? = null,
         notGetTotal: Boolean? = null,
         useControlId: Boolean? = null,
-    ): JSONObject {
+        clazz: Class<T>
+    ): RowBaseResult<T> {
 
         val url = getUrl(baseUrlKey, URL_FILTER_ROW)
         val appConfig = getAppConfig(appConfigKey)
@@ -93,8 +92,23 @@ internal object ApiManager {
 
 
         val resultStr = HttpClientUtil.post(url, requestData.toJson())
-        //解析数据
-        val result = JSON.parseObject(resultStr, object : TypeReference<BaseResult<JSONObject>>() {})
+
+
+        // 构建 Type 对象，用于解析JSON
+        val listType: Type = object : ParameterizedType {
+            override fun getRawType(): Type = RowBaseResult::class.java
+            override fun getOwnerType(): Type? = null
+            override fun getActualTypeArguments(): Array<Type> = arrayOf(clazz)
+        }
+
+        val type: Type = object : ParameterizedType {
+            override fun getRawType(): Type = BaseResult::class.java
+            override fun getOwnerType(): Type? = null
+            override fun getActualTypeArguments(): Array<Type> = arrayOf(listType)
+        }
+
+        // 使用构建好的 Type 对象解析JSON
+        val result = JSON.parseObject(resultStr, type) as BaseResult<RowBaseResult<T>>
 
         return if (ErrorCodeEnum.fromCode(result.error_code) == ErrorCodeEnum.SUCCESS) {
             result.data!!
@@ -227,15 +241,21 @@ internal object ApiManager {
      * [rowId] 行记录ID
      * @return 行记录数据JSON
      */
-    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String): JSONObject {
+    fun <T> getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String,clazz:Class<T>): T {
 
         val url = getUrl(baseUrlKey, URL_GET_ROW)
         val appConfig = getAppConfig(appConfigKey)
 
         val requestData = hashMapOf("appKey" to appConfig.appKey, "sign" to appConfig.sign, "worksheetId" to tableId, "rowId" to rowId)
         val resultStr = HttpClientUtil.post(url, requestData.toJson())
-        //解析数据
-        val result = JSON.parseObject(resultStr, object : TypeReference<BaseResult<JSONObject>>() {})
+
+        val type: Type = object : ParameterizedType {
+            override fun getRawType(): Type = BaseResult::class.java
+            override fun getOwnerType(): Type? = null
+            override fun getActualTypeArguments(): Array<Type> = arrayOf(clazz)
+        }
+
+        val result = JSON.parseObject(resultStr, type) as BaseResult<T>
 
         return if (ErrorCodeEnum.fromCode(result.error_code) == ErrorCodeEnum.SUCCESS) {
             result.data!!
