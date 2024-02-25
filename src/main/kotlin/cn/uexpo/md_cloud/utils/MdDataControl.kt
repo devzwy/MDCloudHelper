@@ -3,9 +3,8 @@ package cn.uexpo.md_cloud.utils
 import cn.uexpo.md_cloud.data.MuliDataType
 import cn.uexpo.md_cloud.data.MuliEditType
 import cn.uexpo.md_cloud.data.OptionDataType
-import com.alibaba.fastjson2.JSONObject
 
-class MdControl private constructor(val controls: List<HashMap<String, Any?>>) {
+class MdDataControl private constructor(val controls: List<HashMap<String, Any?>>) {
     class Builder {
 
         private val list = arrayListOf<HashMap<String, Any?>>()
@@ -67,13 +66,9 @@ class MdControl private constructor(val controls: List<HashMap<String, Any?>>) {
             return this
         }
 
-        fun build(): MdControl {
-            return MdControl(list)
+        fun build(): MdDataControl {
+            return MdDataControl(list)
         }
     }
 
-}
-
-fun main() {
-    MdControl.Builder().build()
 }

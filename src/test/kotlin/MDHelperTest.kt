@@ -1,10 +1,11 @@
 import cn.uexpo.md_cloud.MDHelper
+import cn.uexpo.md_cloud.data.DataTypeEnum
 import cn.uexpo.md_cloud.data.MuliDataType
 import cn.uexpo.md_cloud.data.OptionDataType
-import cn.uexpo.md_cloud.utils.MdControl
+import cn.uexpo.md_cloud.utils.MdDataControl
+import cn.uexpo.md_cloud.utils.MdFilterControl
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertThrows
-import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -21,6 +22,7 @@ class MDHelperTest {
         //todo 修改为自己的
         val baseUrl = ""
         val appKey = ""
+        val tableId = ""
         val sign = ""
 
 
@@ -34,14 +36,14 @@ class MDHelperTest {
 
         assertNotNull(instance.getAppInfo())
 
-        val tableInfo = instance.getTableInfo(tableId = "658e7f60dd2e9988fc03dc25")
+        val tableInfo = instance.getTableInfo(tableId = tableId)
 
         assertNotNull(tableInfo)
 
         //写入记录
         val rowId = instance.insertRow(
-            tableId = "658e7f60dd2e9988fc03dc25",
-            data = MdControl.Builder()
+            tableId = tableId,
+            data = MdDataControl.Builder()
                 .addControl("658e7f60dd2e9988fc03dc26", "1111111")
                 .addControl("658e7f75dd2e9988fc03dc31", "你好")
                 .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("111.list"), MuliDataType.BASE64)
@@ -50,25 +52,28 @@ class MDHelperTest {
         )
         assertNotNull(rowId)
 
-        assertTrue { instance.updateRow(tableId = "658e7f60dd2e9988fc03dc25", rowId = rowId, data = MdControl.Builder()
+        assertTrue { instance.updateRow(tableId = tableId, rowId = rowId, data = MdDataControl.Builder()
             .addControl("658e7f60dd2e9988fc03dc26", "更新后的数据")
             .addControl("658e7f75dd2e9988fc03dc31", "更新后的数据2")
             .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("更新后的数据.list"), MuliDataType.BASE64)
             .addOption("65b0b8ef384db183c9a18342", "更新后的数据", OptionDataType.ADD)
             .build()) }
 
-        assertNotNull(instance.getRow(tableId = "658e7f60dd2e9988fc03dc25", rowId = rowId))
-
+        assertNotNull(instance.getRow(tableId = tableId, rowId = rowId))
+        
+        
+        instance.deleteRow(tableId = tableId, rowId = rowId)
+        
         val rowCount = instance.insertRows(
-            tableId = "658e7f60dd2e9988fc03dc25",
+            tableId = tableId,
             dataList = arrayListOf(
-                MdControl.Builder()
+                MdDataControl.Builder()
                     .addControl("658e7f60dd2e9988fc03dc26", "1111111")
                     .addControl("658e7f75dd2e9988fc03dc31", "你好")
                     .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("222.list"), MuliDataType.BASE64)
                     .addOption("65b0b8ef384db183c9a18342", "已打印2", OptionDataType.ADD)
                     .build(),
-                MdControl.Builder()
+                MdDataControl.Builder()
                     .addControl("658e7f60dd2e9988fc03dc26", "222")
                     .addControl("658e7f75dd2e9988fc03dc31", "你好啊啊啊啊啊")
                     .addMulti("658e8870dd2e9988fc03dc57", arrayListOf("SGVsbG8sIEJhc2U2NA=="), arrayListOf("333.list"), MuliDataType.BASE64)
@@ -78,6 +83,15 @@ class MDHelperTest {
         )
 
         assertEquals(rowCount, 2)
+
+
+        val resultData = instance.getRows(
+            tableId = tableId,
+            filter = MdFilterControl.Builder()
+                .addFilter("658e7f60dd2e9988fc03dc26","222",FilterTypeEnum.EQ)
+                .addFilter("65b0b8ef384db183c9a18342","更新后的数据",FilterTypeEnum.NE)
+                .build(),
+        )
 
     }
 

@@ -2,7 +2,8 @@ package cn.uexpo.md_cloud
 
 import cn.uexpo.md_cloud.manager.ApiManager
 import cn.uexpo.md_cloud.manager.ConfigManager
-import cn.uexpo.md_cloud.utils.MdControl
+import cn.uexpo.md_cloud.utils.MdDataControl
+import cn.uexpo.md_cloud.utils.MdFilterControl
 
 /**
  * 明道工具类
@@ -37,16 +38,58 @@ class MDHelper private constructor() {
 
 
     /**
+     * 获取列表
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [filter] 过滤条件，使用[MdFilterControl.Builder]构造多个
+     * [pageSize] 行数
+     * [pageIndex] 页码
+     * [viewId] 视图ID
+     * [sortId] 排序字段ID
+     * [isAsc] 是否升序
+     * [notGetTotal] 是否不统计总行数以提高性能(默认: false)
+     * [useControlId] 是否只返回controlId(默认: false)
+     * @return 过滤后的数据列表
+     */
+    fun getRows(
+        baseUrlKey: String? = null,
+        appConfigKey: String? = null,
+        tableId: String,
+        filter: MdFilterControl,
+        pageSize: Int? = null,
+        pageIndex: Int? = null,
+        viewId: String? = null,
+        sortId: String? = null,
+        isAsc: Boolean? = null,
+        notGetTotal: Boolean? = null,
+        useControlId: Boolean? = null,
+    ) = ApiManager.getRows(baseUrlKey, appConfigKey, tableId, filter, pageSize, pageIndex, viewId, sortId, isAsc, notGetTotal, useControlId)
+
+    /**
+     * 删除行记录
+     * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
+     * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
+     * [tableId] 操作的表ID，可以为别名或者明道生成的ID
+     * [rowId] 删除行的Id
+     * [triggerWorkflow] 是否触发工作流(默认: true)
+     * @return 删除成功返回true 否则返回false
+     */
+    fun deleteRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String, triggerWorkflow: Boolean = true) =
+        ApiManager.deleteRow(baseUrlKey, appConfigKey, tableId, rowId, triggerWorkflow)
+
+    /**
      * 编辑行记录
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
      * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
      * [tableId] 操作的表ID，可以为别名或者明道生成的ID
      * [rowId] 行记录ID
-     * [data] 更新的数据列，使用[MdControl.Builder]构造
+     * [data] 更新的数据列，使用[MdDataControl.Builder]构造
      * [triggerWorkflow] 是否触发工作流(默认: true)
      * @return 编辑成功返回true，否则返回false
      */
-    fun updateRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String, data: MdControl, triggerWorkflow: Boolean = true) = ApiManager.updateRow(baseUrlKey, appConfigKey, tableId, rowId, data, triggerWorkflow)
+    fun updateRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String, data: MdDataControl, triggerWorkflow: Boolean = true) =
+        ApiManager.updateRow(baseUrlKey, appConfigKey, tableId, rowId, data, triggerWorkflow)
 
     /**
      * 获取行记录详情
@@ -56,18 +99,18 @@ class MDHelper private constructor() {
      * [rowId] 行记录ID
      * @return 行记录数据JSON
      */
-    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String,rowId:String) = ApiManager.getRow(baseUrlKey, appConfigKey, tableId, rowId)
+    fun getRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, rowId: String) = ApiManager.getRow(baseUrlKey, appConfigKey, tableId, rowId)
 
     /**
      * 插入多行记录，最大1000行
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
      * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
      * [tableId] 操作的表ID，可以为别名或者明道生成的ID
-     * [dataList] 写入的数据列，使用[MdControl.Builder]构造多个
+     * [dataList] 写入的数据列，使用[MdDataControl.Builder]构造多个
      * [triggerWorkflow] 是否触发工作流(默认: true)
      * * @return 写入成功后回传写入成功的总行数
      */
-    fun insertRows(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, dataList: List<MdControl>, triggerWorkflow: Boolean = true) =
+    fun insertRows(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, dataList: List<MdDataControl>, triggerWorkflow: Boolean = true) =
         ApiManager.insertRows(baseUrlKey, appConfigKey, tableId, dataList, triggerWorkflow)
 
 
@@ -76,11 +119,11 @@ class MDHelper private constructor() {
      * [baseUrlKey] baseUrl配置的Key，为空时取第一个添加的BaseUrl，如果未添加过BaseUrl时抛出异常
      * [appConfigKey] 应用的配置Key，为空时取第一个添加的应用配置，如果未添加过应用配置则抛出异常
      * [tableId] 操作的表ID，可以为别名或者明道生成的ID
-     * [data] 写入的数据列，使用[MdControl.Builder]构造
+     * [data] 写入的数据列，使用[MdDataControl.Builder]构造
      * [triggerWorkflow] 是否触发工作流(默认: true)
      * @return 写入成功后回传写入的行ID
      */
-    fun insertRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, data: MdControl, triggerWorkflow: Boolean = true) =
+    fun insertRow(baseUrlKey: String? = null, appConfigKey: String? = null, tableId: String, data: MdDataControl, triggerWorkflow: Boolean = true) =
         ApiManager.insertRow(baseUrlKey, appConfigKey, tableId, data, triggerWorkflow)
 
     /**
